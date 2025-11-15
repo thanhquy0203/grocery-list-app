@@ -1,16 +1,18 @@
 import { View, Text, FlatList, TouchableOpacity, Alert } from "react-native";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import { deleteItem, getItems, toggleBought } from "@/db/db";
 import { GroceryItem } from "@/types/grocery";
 import { router, useFocusEffect } from "expo-router";
-import { FAB } from "react-native-paper";
+import { FAB, TextInput } from "react-native-paper";
 
 export default function GroceryListPage() {
   const db = useSQLiteContext();
 
   const [items, setItems] = useState<GroceryItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
 
   const loadData = async () => {
     setLoading(true);
@@ -42,6 +44,15 @@ export default function GroceryListPage() {
     ]);
   };
 
+   const filteredItems = useMemo(() => {
+    const keyword = search.toLowerCase().trim();
+    if (!keyword) return items;
+
+    return items.filter((item) =>
+      item.name.toLowerCase().includes(keyword)
+    );
+  }, [items, search]);
+
   return (
     <View style={{ flex: 1, padding: 16 }}>
       <Text
@@ -53,6 +64,19 @@ export default function GroceryListPage() {
       >
         Danh sách Grocery
       </Text>
+      <TextInput
+        placeholder="Tìm món..."
+        value={search}
+        onChangeText={setSearch}
+        style={{
+          backgroundColor: "#fff",
+          padding: 10,
+          borderRadius: 8,
+          marginBottom: 16,
+          borderWidth: 1,
+          borderColor: "#ccc",
+        }}
+      />
 
       {loading && <Text>Đang tải dữ liệu...</Text>}
 
@@ -63,7 +87,7 @@ export default function GroceryListPage() {
       )}
 
       <FlatList
-        data={items}
+        data={filteredItems}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={{ marginBottom: 16 }}>
