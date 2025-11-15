@@ -1,8 +1,10 @@
 import { View, Text, FlatList } from "react-native";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import { getItems } from "@/db/db";
 import { GroceryItem } from "@/types/grocery";
+import { router, useFocusEffect } from "expo-router";
+import { FAB } from "react-native-paper";
 
 export default function GroceryListPage() {
   const db = useSQLiteContext();
@@ -18,9 +20,11 @@ export default function GroceryListPage() {
     setLoading(false);
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+ useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [])
+  );
 
   return (
     <View style={{ flex: 1, padding: 16 }}>
@@ -70,6 +74,15 @@ export default function GroceryListPage() {
             </Text>
           </View>
         )}
+      />
+       <FAB
+        icon="plus"
+        style={{
+          position: "absolute",
+          right: 20,
+          bottom: 20,
+        }}
+        onPress={() => router.push("/add-edit-modal")}
       />
     </View>
   );

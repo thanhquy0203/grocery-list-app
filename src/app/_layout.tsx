@@ -7,9 +7,15 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 export default function Layout() {
   return (
     <SQLiteProvider databaseName="grocery.db" onInit={(db) => initDb(db)}>
-       <SafeAreaProvider>
+      <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1 }}>
-          <Stack screenOptions={{ headerShown: false }} />
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen
+              name="add-edit-modal"
+              options={{ presentation: "modal" }}
+            />
+          </Stack>
         </SafeAreaView>
       </SafeAreaProvider>
     </SQLiteProvider>

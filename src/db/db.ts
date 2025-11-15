@@ -52,3 +52,18 @@ export const getItems = async (db: SQLiteDatabase): Promise<GroceryItem[]> => {
     `SELECT * FROM grocery_items ORDER BY created_at DESC`
   );
 };
+
+export const createItem = async (db: SQLiteDatabase, data: any) => {
+  await db.runAsync(
+    `INSERT INTO grocery_items (name, quantity, category, bought, created_at)
+     VALUES (?, ?, ?, ?, ?)`,
+    [
+      data.name,
+      data.quantity ?? 1,
+      data.category ?? "",
+      data.bought ?? 0,
+      Date.now(),
+    ]
+  );
+};
+
