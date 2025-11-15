@@ -1,3 +1,4 @@
+import { GroceryItem } from "@/types/grocery";
 import { SQLiteDatabase } from "expo-sqlite";
 
 
@@ -42,4 +43,12 @@ const isEmpty = rows[0]?.count === 0;
       ["Bánh mì", 2, "Đồ ăn sáng", 0, Date.now()]
     );
   }
+
+  
+};
+
+export const getItems = async (db: SQLiteDatabase): Promise<GroceryItem[]> => {
+  return await db.getAllAsync<GroceryItem>(
+    `SELECT * FROM grocery_items ORDER BY created_at DESC`
+  );
 };
