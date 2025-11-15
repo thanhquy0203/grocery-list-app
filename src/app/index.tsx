@@ -5,87 +5,40 @@ import { createItem, deleteItem, getItems, toggleBought } from "@/db/db";
 import { GroceryItem } from "@/types/grocery";
 import { router, useFocusEffect } from "expo-router";
 import { Button, FAB, TextInput } from "react-native-paper";
+import { useGroceryItems } from "@/hooks/useGroceryItems";
 
 export default function GroceryListPage() {
-  const db = useSQLiteContext();
-
-  const [items, setItems] = useState<GroceryItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [importLoading, setImportLoading] = useState(false);
-  const [importError, setImportError] = useState("");
-
-  const loadData = async () => {
-    setLoading(true);
-    const data = await getItems(db);
-    setItems(data);
-    setLoading(false);
-  };
+  const {
+    filteredItems,
+    loading,
+    refreshing,
+    importLoading,
+    importError,
+    search,
+    setSearch,
+    loadData,
+    onRefresh,
+    toggleItem,
+    removeItem,
+    importFromApi,
+  } = useGroceryItems();
 
   useFocusEffect(
     useCallback(() => {
       loadData();
     }, [])
   );
-  const handleToggleBought = async (item: GroceryItem) => {
-    await toggleBought(db, item.id, item.bought);
-    loadData();
-  };
 
-  const handleImport = async () => {
-    setImportLoading(true);
-    setImportError("");
-
-    try {
-      const response = await fetch(
-        "https://68e8a3ccf2707e6128cb89f7.mockapi.io/huynhthanhquy_22638141_final"
-      );
-      if (!response.ok) throw new Error("Fetch API thất bại");
-
-      const apiItems = await response.json();
-
-      for (const apiItem of apiItems) {
-        const existed = items.find(
-          (x) => x.name.toLowerCase() === apiItem.name.toLowerCase()
-        );
-        if (existed) continue;
-
-        await createItem(db, {
-          name: apiItem.name,
-          quantity: apiItem.quantity ?? 1,
-          category: apiItem.category ?? "",
-          bought: apiItem.completed ? 1 : 0,
-        });
-      }
-
-      await loadData();
-    } catch (err: any) {
-      setImportError(err.message);
-    }
-
-    setImportLoading(false);
-  };
-
-  const handleDelete = (id: number) => {
+   const handleDelete = (id: number) => {
     Alert.alert("Xác nhận", "Bạn có chắc chắn muốn xóa món này không?", [
       { text: "Hủy", style: "cancel" },
       {
         text: "Xóa",
         style: "destructive",
-        onPress: async () => {
-          await deleteItem(db, id);
-          loadData();
-        },
+        onPress: () => removeItem(id),
       },
     ]);
   };
-
-  const filteredItems = useMemo(() => {
-    const keyword = search.toLowerCase().trim();
-    if (!keyword) return items;
-
-    return items.filter((item) => item.name.toLowerCase().includes(keyword));
-  }, [items, search]);
 
   return (
     <View style={{ flex: 1, padding: 16 }}>
@@ -115,7 +68,7 @@ export default function GroceryListPage() {
         mode="contained"
         loading={importLoading}
         disabled={importLoading}
-        onPress={handleImport}
+        onPress={importFromApi}
         style={{ marginBottom: 12 }}
       >
         Import từ API
@@ -129,7 +82,8 @@ export default function GroceryListPage() {
 
       {loading && <Text>Đang tải dữ liệu...</Text>}
 
-      {!loading && items.length === 0 && (
+      {!loading && filteredItems.length === 0 && (
+
         <Text style={{ color: "gray", fontStyle: "italic" }}>
           Danh sách trống, thêm món cần mua nhé!
         </Text>
@@ -141,7 +95,7 @@ export default function GroceryListPage() {
         renderItem={({ item }) => (
           <View style={{ marginBottom: 16 }}>
             <TouchableOpacity
-              onPress={() => handleToggleBought(item)}
+              onPress={() => toggleItem(item)}
               activeOpacity={0.8}
               style={{
                 padding: 12,
