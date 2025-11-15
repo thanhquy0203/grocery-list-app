@@ -1,7 +1,7 @@
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Alert } from "react-native";
 import { useCallback, useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite";
-import { getItems, toggleBought } from "@/db/db";
+import { deleteItem, getItems, toggleBought } from "@/db/db";
 import { GroceryItem } from "@/types/grocery";
 import { router, useFocusEffect } from "expo-router";
 import { FAB } from "react-native-paper";
@@ -28,6 +28,20 @@ export default function GroceryListPage() {
     await toggleBought(db, item.id, item.bought);
     loadData();
   };
+  const handleDelete = (id: number) => {
+    Alert.alert("Xác nhận", "Bạn có chắc chắn muốn xóa món này không?", [
+      { text: "Hủy", style: "cancel" },
+      {
+        text: "Xóa",
+        style: "destructive",
+        onPress: async () => {
+          await deleteItem(db, id);
+          loadData();
+        },
+      },
+    ]);
+  };
+
   return (
     <View style={{ flex: 1, padding: 16 }}>
       <Text
@@ -52,12 +66,14 @@ export default function GroceryListPage() {
         data={items}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handleToggleBought(item)}>
-            <View
+          <View style={{ marginBottom: 16 }}>
+            
+            <TouchableOpacity
+              onPress={() => handleToggleBought(item)}
+              activeOpacity={0.8}
               style={{
                 padding: 12,
-                backgroundColor: item.bought ? "#d4ffd4" : "#fff", // nền xanh nhạt nếu đã mua
-                marginBottom: 12,
+                backgroundColor: item.bought ? "#d4ffd4" : "#fff",
                 borderRadius: 8,
               }}
             >
@@ -65,7 +81,7 @@ export default function GroceryListPage() {
                 style={{
                   fontSize: 18,
                   fontWeight: "bold",
-                  textDecorationLine: item.bought ? "line-through" : "none", // 👉 Q5: gạch ngang nếu bought=1
+                  textDecorationLine: item.bought ? "line-through" : "none",
                 }}
               >
                 {item.name} {item.bought ? "✓" : ""}
@@ -74,14 +90,24 @@ export default function GroceryListPage() {
               <Text>Số lượng: {item.quantity}</Text>
               <Text>Loại: {item.category || "Không có"}</Text>
               <Text>Trạng thái: {item.bought ? "Đã mua ✓" : "Chưa mua"}</Text>
-            </View>
+            </TouchableOpacity>
+
+            
             <TouchableOpacity
               style={{ position: "absolute", right: 12, top: 12 }}
               onPress={() => router.push(`/add-edit-modal?id=${item.id}`)}
             >
               <Text style={{ color: "blue", fontWeight: "bold" }}>Sửa</Text>
             </TouchableOpacity>
-          </TouchableOpacity>
+
+            
+            <TouchableOpacity
+              style={{ position: "absolute", right: 12, top: 40 }}
+              onPress={() => handleDelete(item.id)}
+            >
+              <Text style={{ color: "red", fontWeight: "bold" }}>Xóa</Text>
+            </TouchableOpacity>
+          </View>
         )}
       />
       <FAB

@@ -95,3 +95,14 @@ export const updateItem = async (
     [item.name, item.quantity, item.category, item.id]
   );
 };
+
+
+// xóa item
+export const deleteItem = async (db: SQLiteDatabase, id: number) => {
+  await db.runAsync(
+    `DELETE FROM grocery_items WHERE id = ?`,
+    [id]
+  );
+};
+
+
