@@ -76,3 +76,22 @@ export const toggleBought = async (db: SQLiteDatabase, id: number, current: numb
     [newValue, id]
   );
 };
+
+// lấy 1 item theo ID
+export const getItemById = async ( db: SQLiteDatabase,  id: number): 
+Promise<GroceryItem | undefined> => {
+  const rows = await db.getAllAsync<GroceryItem>(
+    `SELECT * FROM grocery_items WHERE id = ?`, [id] );
+  return rows[0];
+};
+
+// cập nhật item
+export const updateItem = async (
+  db: SQLiteDatabase,
+  item: { id: number; name: string; quantity: number; category: string }
+) => {
+  await db.runAsync(
+    `UPDATE grocery_items SET name=?, quantity=?, category=? WHERE id=?`,
+    [item.name, item.quantity, item.category, item.id]
+  );
+};

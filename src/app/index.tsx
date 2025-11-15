@@ -12,7 +12,6 @@ export default function GroceryListPage() {
   const [items, setItems] = useState<GroceryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  
   const loadData = async () => {
     setLoading(true);
     const data = await getItems(db);
@@ -20,14 +19,14 @@ export default function GroceryListPage() {
     setLoading(false);
   };
 
- useFocusEffect(
+  useFocusEffect(
     useCallback(() => {
       loadData();
     }, [])
   );
   const handleToggleBought = async (item: GroceryItem) => {
     await toggleBought(db, item.id, item.bought);
-    loadData(); 
+    loadData();
   };
   return (
     <View style={{ flex: 1, padding: 16 }}>
@@ -41,17 +40,14 @@ export default function GroceryListPage() {
         Danh sách Grocery
       </Text>
 
-      
       {loading && <Text>Đang tải dữ liệu...</Text>}
 
-      
       {!loading && items.length === 0 && (
         <Text style={{ color: "gray", fontStyle: "italic" }}>
           Danh sách trống, thêm món cần mua nhé!
         </Text>
       )}
 
-    
       <FlatList
         data={items}
         keyExtractor={(item) => item.id.toString()}
@@ -77,14 +73,18 @@ export default function GroceryListPage() {
 
               <Text>Số lượng: {item.quantity}</Text>
               <Text>Loại: {item.category || "Không có"}</Text>
-              <Text>
-                Trạng thái: {item.bought ? "Đã mua ✓" : "Chưa mua"}
-              </Text>
+              <Text>Trạng thái: {item.bought ? "Đã mua ✓" : "Chưa mua"}</Text>
             </View>
+            <TouchableOpacity
+              style={{ position: "absolute", right: 12, top: 12 }}
+              onPress={() => router.push(`/add-edit-modal?id=${item.id}`)}
+            >
+              <Text style={{ color: "blue", fontWeight: "bold" }}>Sửa</Text>
+            </TouchableOpacity>
           </TouchableOpacity>
         )}
       />
-       <FAB
+      <FAB
         icon="plus"
         style={{
           position: "absolute",
