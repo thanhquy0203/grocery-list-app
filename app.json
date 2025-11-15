@@ -11,7 +11,8 @@
       {
         "origin": "https://n"
       }
-    ]
+    ],
+    "expo-sqlite"
   ],
   "name": "ThanhQuy",
   "slug": "ThanhQuy"
