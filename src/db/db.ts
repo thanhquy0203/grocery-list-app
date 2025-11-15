@@ -67,3 +67,12 @@ export const createItem = async (db: SQLiteDatabase, data: any) => {
   );
 };
 
+
+export const toggleBought = async (db: SQLiteDatabase, id: number, current: number) => {
+  const newValue = current === 1 ? 0 : 1;
+
+  await db.runAsync(
+    `UPDATE grocery_items SET bought = ? WHERE id = ?`,
+    [newValue, id]
+  );
+};
